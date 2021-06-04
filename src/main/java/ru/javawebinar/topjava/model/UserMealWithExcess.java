@@ -19,6 +19,14 @@ public class UserMealWithExcess {
         this.excess = excess;
     }
 
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public AtomicBoolean getExcess() {
+        return excess;
+    }
+
     @Override
     public String toString() {
         return "UserMealWithExcess{" +

@@ -9,7 +9,10 @@ import java.time.LocalTime;
 import java.time.Month;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class UserMealsUtil {
     public static void main(String[] args) {
@@ -29,9 +32,9 @@ public class UserMealsUtil {
         mealsTo.forEach(System.out::println);
         mealsTo = filteredByOneLoop(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
         mealsTo.forEach(System.out::println);
+        mealsTo = filteredByOneStream(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
+        mealsTo.forEach(System.out::println);
 
-
-//        System.out.println(filteredByStreams(meals, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000));
     }
 
     public static List<UserMealWithExcess> filteredByCycles(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
@@ -78,7 +81,37 @@ public class UserMealsUtil {
                 userMealWithExcesses.add(new UserMealWithExcess(meal.getDateTime(), meal.getDescription(), meal.getCalories(), dateWithExcess.get(meal.getLocalDate())));
             }
         }
-
         return userMealWithExcesses;
+    }
+
+    public static List<UserMealWithExcess> filteredByOneStream(List<UserMeal> meals, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+
+        return meals.stream()
+                .collect(veryWeirdCollector(startTime, endTime, caloriesPerDay));
+    }
+
+    public static Collector<UserMeal, ?, List<UserMealWithExcess>> veryWeirdCollector(LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
+        return Collector.<UserMeal, Map.Entry<Map<LocalDate, Integer>, List<UserMealWithExcess>>, List<UserMealWithExcess>>of(
+                () -> new AbstractMap.SimpleImmutableEntry<>(
+                        new HashMap<>(), new ArrayList<>()),
+                (c, e) -> {
+                    c.getKey().put(e.getLocalDate(), (c.getKey().getOrDefault(e.getLocalDate(), 0)) + e.getCalories());
+                    if (TimeUtil.isBetweenHalfOpen(e.getLocalTime(), startTime, endTime)) {
+                        c.getValue().add(new UserMealWithExcess(e.getDateTime(), e.getDescription(), e.getCalories(), new AtomicBoolean(false)));
+                    }
+                },
+                (c1, c2) -> {
+                    c2.getKey().forEach((k, v) -> c1.getKey().merge(k, v, Integer::sum));
+                    c1.getValue().addAll(c2.getValue());
+                    return c1;
+                },
+                c -> {
+                    for (UserMealWithExcess userMealWithExcess : c.getValue()) {
+                        if (c.getKey().get(userMealWithExcess.getDateTime().toLocalDate()) > caloriesPerDay) {
+                            userMealWithExcess.getExcess().set(true);
+                        }
+                    }
+                    return c.getValue();
+                });
     }
 }
