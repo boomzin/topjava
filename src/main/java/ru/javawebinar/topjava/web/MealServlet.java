@@ -37,7 +37,7 @@ public class MealServlet extends HttpServlet {
                 new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 13, 0), "Обед", 500),
                 new Meal(LocalDateTime.of(2020, Month.JANUARY, 31, 20, 0), "Ужин", 410)
         ));
-        mealsWithExcess = MealsUtil.filteredByStreams(meals, LocalTime.of(0, 0), LocalTime.of(12, 0), CALORIES_PER_DAY);
+        mealsWithExcess = MealsUtil.filteredByStreams(meals, LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY);
     }
 
     @Override
