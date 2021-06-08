@@ -2,7 +2,6 @@ package ru.javawebinar.topjava.service;
 
 import ru.javawebinar.topjava.model.Meal;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,7 +31,7 @@ public class MealServiceMemoryImp implements MealService {
 
     @Override
     public boolean update(int id, Meal meal) {
-        if (MEAL_REPOSITORY_MAP.contains(id)) {
+        if (MEAL_REPOSITORY_MAP.containsKey(id)) {
             meal.setId(id);
             MEAL_REPOSITORY_MAP.put(id, meal);
             return true;
