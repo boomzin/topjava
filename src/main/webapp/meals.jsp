@@ -24,7 +24,7 @@
         <th>Calories</th>
     </tr>
     <c:forEach var="meal" items="${requestScope.mealsWithExcess}">
-        <tr style="color:${meal.isExcess() ? 'Green' : 'red'}">
+        <tr style="color:${meal.isExcess() ? 'Red' : 'Green'}">
             <td>${meal.dateTime.toLocalDate()} ${meal.dateTime.toLocalTime()}</td>
             <td>${meal.getDescription()}</td>
             <td>${meal.getCalories()}</td>
