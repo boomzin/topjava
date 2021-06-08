@@ -28,6 +28,7 @@
             <td>${meal.dateTime.toLocalDate()} ${meal.dateTime.toLocalTime()}</td>
             <td>${meal.getDescription()}</td>
             <td>${meal.getCalories()}</td>
+            <td><a href="meals?action=delete&mealId=<c:out value="${meal.getId()}"/>">Delete</a></td>
         </tr>
     </c:forEach>
     </tbody>
