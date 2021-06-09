@@ -26,12 +26,12 @@
         <th colspan=2>Action</th>
     </tr>
     <c:forEach var="meal" items="${requestScope.mealsWithExcess}">
-        <tr style="color:${meal.isExcess() ? 'Red' : 'Green'}">
-            <td>${meal.dateTime.toLocalDate()} ${meal.dateTime.toLocalTime()}</td>
-            <td>${meal.getDescription()}</td>
-            <td>${meal.getCalories()}</td>
-            <td><a href="meals?action=delete&mealId=<c:out value="${meal.getId()}"/>">Delete</a></td>
-            <td><a href="meals?action=edit&mealId=<c:out value="${meal.getId()}"/>">Edit</a></td>
+        <tr style="color:${meal.excess ? 'Red' : 'Green'}">
+            <td>${meal.dateTime.toString().replace("T", " ")}</td>
+            <td>${meal.description}</td>
+            <td>${meal.calories}</td>
+            <td><a href="meals?action=delete&mealId=${meal.id}">Delete</a></td>
+            <td><a href="meals?action=edit&mealId=${meal.id}">Edit</a></td>
         </tr>
     </c:forEach>
     </tbody>

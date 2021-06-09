@@ -1,19 +1,18 @@
-package ru.javawebinar.topjava.service;
+package ru.javawebinar.topjava.storage;
 
 import ru.javawebinar.topjava.model.Meal;
 
 import java.util.List;
 
-public interface MealService {
+public interface MealStorage {
 
-    void create(Meal meal);
+    Meal create(Meal meal);
 
     List<Meal> readAll();
 
     Meal read(int id);
 
-    boolean update(int id, Meal meal);
+    Meal update(Meal meal);
 
     boolean delete(int id);
-
 }

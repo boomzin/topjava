@@ -1,7 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <%@ page contentType="text/html;charset=UTF-8" %>
-<html lang="ru">
+<!DOCTYPE html>
 <head>
     <title>Meal</title>
 </head>
@@ -11,20 +10,16 @@
 <c:set var="meal" value="${requestScope.meal}"/>
 <c:set value="${meal eq null}" var="isNewMeal"/>
 <form method="POST" action='meals' name="frmAddMeal">
-    Meal ID : <input type="text" readonly="readonly" name="mealId"
-                     value="<c:out value="${isNewMeal ? '' : meal.getId()}" />" /> <br />
+    <input type="hidden" readonly="readonly" name="mealId"
+           value="<c:out value="${isNewMeal ? '' : meal.id}" />"/> <br/>
     DateTime : <input
-        type="text" name="dateTime"
-        <fmt:parseDate value="${isNewMeal ? '2000-01-01 00:00' : meal.getDateTime().toString().replace('T', ' ')}" pattern="yyyy-MM-dd HH:mm" var="parseDateTime"/>
-        value="<fmt:formatDate pattern="dd/MM/yyyy HH:mm" value="${parseDateTime}" />" /> <br />
+        type="datetime-local" name="dateTime"
+        value="${meal.dateTime}"/> <br/>
     Description : <input
         type="text" name="description"
-        value="<c:out value="${meal.getDescription()}" />" /> <br />
-    Calories : <input type="text" name="calories"
-                   value="<c:out value="${meal.getCalories()}" />" /> <br /> <input
-        type="submit" value="${isNewMeal ? 'Add meal' : 'Edit meal'}" />
+        value="${meal.getDescription()}"/><br/>
+    Calories : <input type="number" name="calories"
+                      value="${meal.calories}"/><br/>
+    <input type="submit" value="${isNewMeal ? 'Add meal' : 'Edit meal'}"/>
 </form>
-    </tbody>
-</table>
 </body>
-</html>
