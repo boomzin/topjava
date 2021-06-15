@@ -16,12 +16,15 @@ public class InMemoryMealRepository implements MealRepository {
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.meals.forEach(meal -> this.save(meal, SecurityUtil.authUserId()));
+        MealsUtil.meals.forEach(meal -> this.save(meal, 1));
     }
 
     @Override
     public Meal save(Meal meal, int userId) {
         Set<Integer> mealIdSet = new HashSet<>();
+        if (!mealsIdsByUserId.containsKey(userId)) {
+            mealsIdsByUserId.put(userId, mealIdSet);
+        }
         mealIdSet.addAll(mealsIdsByUserId.get(userId));
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
@@ -30,8 +33,9 @@ public class InMemoryMealRepository implements MealRepository {
             mealsIdsByUserId.put(userId, mealIdSet);
             return meal;
         }
-        mealIdSet.add(meal.getId());
-        mealsIdsByUserId.put(userId, mealIdSet);
+        if (!mealIdSet.contains(meal.getId())) {
+            return null;
+        }
         // handle case: update, but not present in storage
         return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
@@ -54,7 +58,7 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public Collection<Meal> getAll(int userId) {
-        List<Meal> mealList = new ArrayList<>(repository.values().stream().filter(meal -> mealsIdsByUserId.get(userId).contains(meal)).collect(Collectors.toList()));
+        List<Meal> mealList = new ArrayList<>(repository.values().stream().filter(meal -> mealsIdsByUserId.get(userId).contains(meal.getId())).collect(Collectors.toList()));
         mealList.sort(Comparator.comparing(Meal::getDate).reversed());
         return mealList;
     }
