@@ -6,14 +6,11 @@ import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
 
 @Repository
 public class InMemoryMealRepository implements MealRepository {
@@ -69,10 +66,12 @@ public class InMemoryMealRepository implements MealRepository {
     }
 
     @Override
-    public Collection<Meal> getAll(int userId) {
+    public List<Meal> getAll(int userId) {
         log.info("getAll meal for user {}", userId);
-        List<Meal> mealList = new ArrayList<>(repository.values().stream().filter(meal -> mealsIdsByUserId.get(userId).contains(meal.getId())).collect(Collectors.toList()));
-        mealList.sort(Comparator.comparing(Meal::getDate).reversed());
+        List<Meal> mealList = new ArrayList<>(repository.values().stream()
+                .filter(meal -> mealsIdsByUserId.get(userId).contains(meal.getId()))
+                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
+                .collect(Collectors.toList()));
         return mealList;
     }
 }
