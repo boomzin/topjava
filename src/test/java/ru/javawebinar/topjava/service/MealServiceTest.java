@@ -13,11 +13,10 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
 
 @ContextConfiguration({
