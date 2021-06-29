@@ -1,13 +1,15 @@
 package ru.javawebinar.topjava.service;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestRule;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter;
+import org.junit.*;
+import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
-import org.junit.runners.model.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,7 +21,8 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.LogManager;
 
 import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
@@ -33,13 +36,42 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
-    private static long startTestTime;
+
+    private static final Logger log = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    private static StringBuilder stringBuilder = new StringBuilder();
 
     @Autowired
     private MealService service;
 
+    @AfterClass
+    public static void after() {
+        log.info(stringBuilder.toString());
+    }
+
+    private static void logInfo(Description description, String status, long nanos) {
+        String testInfo = String.format("\u001B[36m Test %-25s %s, spent %-5d ms \u001B[0m",
+                description.getMethodName(), status, TimeUnit.NANOSECONDS.toMillis(nanos));
+        stringBuilder.append(testInfo + System.lineSeparator());
+        log.info(testInfo);
+    }
+
     @Rule
-    public TimeTestRule timeTestRule = new TimeTestRule();
+    public Stopwatch stopwatch = new Stopwatch() {
+        @Override
+        protected void succeeded(long nanos, Description description) {
+            logInfo(description, "succeeded", nanos);
+        }
+
+        @Override
+        protected void failed(long nanos, Throwable e, Description description) {
+            logInfo(description, "failed", nanos);
+        }
+
+        @Override
+        protected void skipped(long nanos, AssumptionViolatedException e, Description description) {
+            logInfo(description, "skipped", nanos);
+        }
+    };
 
     @Test
     public void delete() {
@@ -119,32 +151,5 @@ public class MealServiceTest {
     @Test
     public void getBetweenWithNullDates() {
         MATCHER.assertMatch(service.getBetweenInclusive(null, null, USER_ID), meals);
-    }
-
-    @BeforeClass
-    public static void before() {
-        startTestTime = new Date().getTime();
-    }
-
-    @AfterClass
-    public static void after() {
-        System.out.println("The execution time of all tests was " + (new Date().getTime() - startTestTime) + "ms");
-
-    }
-
-    public class TimeTestRule implements TestRule {
-
-        @Override
-        public Statement apply(Statement statement, Description description) {
-            return new Statement() {
-                @Override
-                public void evaluate() throws Throwable {
-                    long startTime = new Date().getTime();
-                    statement.evaluate();
-                    System.out.println("The execution time of " + description.getMethodName() +
-                            " test was " + (new Date().getTime() - startTime) + "ms");
-                }
-            };
-        }
     }
 }
