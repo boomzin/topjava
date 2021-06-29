@@ -1,10 +1,9 @@
 package ru.javawebinar.topjava.service;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-import ch.qos.logback.core.util.StatusPrinter;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.AssumptionViolatedException;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
@@ -22,7 +21,6 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.LogManager;
 
 import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
@@ -49,7 +47,7 @@ public class MealServiceTest {
     }
 
     private static void logInfo(Description description, String status, long nanos) {
-        String testInfo = String.format("\u001B[36m Test %-25s %s, spent %-5d ms \u001B[0m",
+        String testInfo = String.format("Test %-25s %s, spent \u001B[36m %-5d \u001B[0m ms",
                 description.getMethodName(), status, TimeUnit.NANOSECONDS.toMillis(nanos));
         stringBuilder.append(testInfo + System.lineSeparator());
         log.info(testInfo);
