@@ -1,7 +1,13 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
+import org.junit.runners.model.Statement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.test.context.ContextConfiguration;
@@ -13,6 +19,7 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Date;
 
 import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
@@ -26,9 +33,13 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
+    private static long startTestTime;
 
     @Autowired
     private MealService service;
+
+    @Rule
+    public TimeTestRule timeTestRule = new TimeTestRule();
 
     @Test
     public void delete() {
@@ -108,5 +119,32 @@ public class MealServiceTest {
     @Test
     public void getBetweenWithNullDates() {
         MATCHER.assertMatch(service.getBetweenInclusive(null, null, USER_ID), meals);
+    }
+
+    @BeforeClass
+    public static void before() {
+        startTestTime = new Date().getTime();
+    }
+
+    @AfterClass
+    public static void after() {
+        System.out.println("The execution time of all tests was " + (new Date().getTime() - startTestTime) + "ms");
+
+    }
+
+    public class TimeTestRule implements TestRule {
+
+        @Override
+        public Statement apply(Statement statement, Description description) {
+            return new Statement() {
+                @Override
+                public void evaluate() throws Throwable {
+                    long startTime = new Date().getTime();
+                    statement.evaluate();
+                    System.out.println("The execution time of " + description.getMethodName() +
+                            " test was " + (new Date().getTime() - startTime) + "ms");
+                }
+            };
+        }
     }
 }
