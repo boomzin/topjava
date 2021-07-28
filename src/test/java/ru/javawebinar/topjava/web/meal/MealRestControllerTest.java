@@ -14,7 +14,9 @@ import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.SecurityUtil;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
 import java.util.List;
 
@@ -84,14 +86,19 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void getBetween() throws Exception {
-        LocalDateTime startDateTime = LocalDateTime.of(2020, Month.JANUARY, 30,12, 0);
-        LocalDateTime endDateTime = LocalDateTime.of(2020, Month.JANUARY, 31, 14, 0);
-        List<Meal> mealsDateFiltered = mealService.getBetweenInclusive(startDateTime.toLocalDate(), endDateTime.toLocalDate(), USER_ID);
+        LocalDate startDate = LocalDate.of(2020, Month.JANUARY, 30);
+        LocalTime startTime = LocalTime.of(12, 0);
+        LocalDate endDate = LocalDate.of(2020, Month.JANUARY, 31);
+        LocalTime endTime = LocalTime.of(14, 0);
+        List<Meal> mealsDateFiltered = mealService.getBetweenInclusive(startDate, endDate, USER_ID);
         List<MealTo> mealsToFiltered = MealsUtil.getFilteredTos(mealsDateFiltered, SecurityUtil.authUserCaloriesPerDay(),
-                startDateTime.toLocalTime(), endDateTime.toLocalTime());
+                startTime, endTime);
         perform(MockMvcRequestBuilders.get(REST_URL + "filtered")
-                .param("startDateTime", String.valueOf(startDateTime))
-                .param("endDateTime", String.valueOf(endDateTime)))
+                .param("startDate", String.valueOf(startDate))
+                .param("endDate", String.valueOf(endDate))
+                .param("startTime", String.valueOf(startTime))
+                .param("endTime", String.valueOf(endTime)))
+
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(MEAL_TO_MATCHER.contentJson(mealsToFiltered));
