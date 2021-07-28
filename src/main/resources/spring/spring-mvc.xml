@@ -23,6 +23,17 @@
         </mvc:message-converters>
     </mvc:annotation-driven>
 
+<!--    https://docs.spring.io/spring-framework/docs/3.2.x/spring-framework-reference/html/validation.html-->
+    <mvc:annotation-driven conversion-service="conversionService"/>
+    <bean id="conversionService"
+          class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="formatters">
+            <set>
+                <bean class="ru.javawebinar.topjava.util.LocalDateAnnotationFormatterFactory"/>
+                <bean class="ru.javawebinar.topjava.util.LocalTimeAnnotationFormatterFactory"/>
+            </set>
+        </property>
+    </bean>
     <context:component-scan base-package="ru.javawebinar.**.web"/>
 
     <!--  all resources inside folder src/main/webapp/resources are mapped so they can be referred to inside JSP files -->
