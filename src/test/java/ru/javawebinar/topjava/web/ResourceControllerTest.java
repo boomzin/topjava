@@ -1,4 +1,4 @@
-package ru.javawebinar.topjava;
+package ru.javawebinar.topjava.web;
 
 import org.junit.jupiter.api.Test;
 import ru.javawebinar.topjava.web.AbstractControllerTest;

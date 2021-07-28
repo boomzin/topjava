@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import ru.javawebinar.topjava.MatcherFactory;
 import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
@@ -15,8 +14,7 @@ import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.SecurityUtil;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 
@@ -30,7 +28,6 @@ import static ru.javawebinar.topjava.util.MealsUtil.getTos;
 class MealRestControllerTest extends AbstractControllerTest {
 
     private static final String REST_URL = MealRestController.REST_URL + '/';
-    private final MatcherFactory<MealTo> mealToMatcherFactory = MatcherFactory.usingIgnoringFieldsComparator(MealTo.class, "");
 
     @Autowired
     private MealService mealService;
@@ -57,7 +54,7 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(mealToMatcherFactory.contentJson(getTos(meals, SecurityUtil.authUserCaloriesPerDay())));
+                .andExpect(MEAL_TO_MATCHER.contentJson(getTos(meals, SecurityUtil.authUserCaloriesPerDay())));
     }
 
     @Test
@@ -70,7 +67,7 @@ class MealRestControllerTest extends AbstractControllerTest {
         Meal created = MATCHER.readFromJson(action);
         int newId = created.id();
         newMeal.setId(newId);
-        MATCHER.assertMatch(newMeal, created);
+        MATCHER.assertMatch(created, newMeal);
         MATCHER.assertMatch(mealService.getAll(UserTestData.USER_ID), created, meal7, meal6, meal5, meal4, meal3, meal2, meal1);
     }
 
@@ -87,13 +84,16 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Test
     void getBetween() throws Exception {
-        List<Meal> mealsDateFiltered = mealService.getBetweenInclusive(LocalDate.of(2020, Month.JANUARY, 30),
-                LocalDate.of(2020, Month.JANUARY, 31), USER_ID);
+        LocalDateTime startDateTime = LocalDateTime.of(2020, Month.JANUARY, 30,12, 0);
+        LocalDateTime endDateTime = LocalDateTime.of(2020, Month.JANUARY, 31, 14, 0);
+        List<Meal> mealsDateFiltered = mealService.getBetweenInclusive(startDateTime.toLocalDate(), endDateTime.toLocalDate(), USER_ID);
         List<MealTo> mealsToFiltered = MealsUtil.getFilteredTos(mealsDateFiltered, SecurityUtil.authUserCaloriesPerDay(),
-                LocalTime.of(12, 0), LocalTime.of(14, 0));
-        perform(MockMvcRequestBuilders.get(REST_URL + "filtered?startDateTime=2020-01-30T12:00&endDateTime=2020-01-31T14:00"))
+                startDateTime.toLocalTime(), endDateTime.toLocalTime());
+        perform(MockMvcRequestBuilders.get(REST_URL + "filtered")
+                .param("startDateTime", String.valueOf(startDateTime))
+                .param("endDateTime", String.valueOf(endDateTime)))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(mealToMatcherFactory.contentJson(mealsToFiltered));
+                .andExpect(MEAL_TO_MATCHER.contentJson(mealsToFiltered));
     }
 }
