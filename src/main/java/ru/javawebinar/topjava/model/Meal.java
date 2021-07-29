@@ -76,10 +76,12 @@ public class Meal extends AbstractBaseEntity {
         return calories;
     }
 
+    @JsonIgnore
     public LocalDate getDate() {
         return dateTime.toLocalDate();
     }
 
+    @JsonIgnore
     public LocalTime getTime() {
         return dateTime.toLocalTime();
     }
